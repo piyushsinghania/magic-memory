@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import SingleCard from './components/SingleCard';
 
-const cardImages= [
-  { "src": "/img/helmet-1.png" },
-  { "src": "/img/potion-1.png" },
-  { "src": "/img/ring-1.png" },
-  { "src": "/img/scroll-1.png" },
-  { "src": "/img/shield-1.png" },
-  { "src": "/img/sword-1.png" },
+const cardImages = [
+  { src: '/img/helmet-1.png', matched: false },
+  { src: '/img/potion-1.png', matched: false },
+  { src: '/img/ring-1.png', matched: false },
+  { src: '/img/scroll-1.png', matched: false },
+  { src: '/img/shield-1.png', matched: false },
+  { src: '/img/sword-1.png', matched: false },
 ];
 
 function App() {
@@ -21,31 +21,40 @@ function App() {
   const shuffleCards = () => {
     const shuffledCards = [...cardImages, ...cardImages]
       .sort(() => Math.random() - 0.5)
-      .map((card) => ({...card, id: Math.random()}));
+      .map((card) => ({ ...card, id: Math.random() }));
 
     setCards(shuffledCards);
     setTurns(0);
-  }
+  };
 
   // handle choice
   const handleChoice = (card) => {
     choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
-  }
+  };
 
   // match choices
   useEffect(() => {
-    if(!choiceOne || !choiceTwo) return;
-    if(choiceOne.src === choiceTwo.src) console.log('Cards Matched!');
-    else console.log('Cards do not matched!');
-    resetTurn();
+    if (!choiceOne || !choiceTwo) return;
+    if (choiceOne.src === choiceTwo.src) {
+      setCards((prevCards) => {
+        return prevCards.map((card) => {
+          if (card.src === choiceOne.src) {
+            return { ...card, matched: true };
+          } else {
+            return card;
+          }
+        });
+      });
+      resetTurn();
+    } else setTimeout(() => resetTurn(), 1000);
   }, [choiceOne, choiceTwo]);
 
   // reset choices & increase turn
   const resetTurn = () => {
     setChoiceOne(null);
     setChoiceTwo(null);
-    setTurns(prevTurns => prevTurns + 1);
-  }
+    setTurns((prevTurns) => prevTurns + 1);
+  };
 
   return (
     <div className="App">
@@ -57,6 +66,7 @@ function App() {
             card={card}
             key={card.id}
             handleChoice={handleChoice}
+            flipped={card === choiceOne || card === choiceTwo || card.matched}
           />
         ))}
       </div>
